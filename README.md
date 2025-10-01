@@ -21,11 +21,12 @@ Mục tiêu: bảo vệ **bí mật, toàn vẹn, xác thực và chống chối
 Chạy lệnh sau để sinh khóa cho người gửi và người nhận:
 
 ```bash
-python gen_keys.py
+python gen_keys.py <file_name>
 ```
 Kết quả tạo ra:
-- Người gửi: `sender_priv.pem`, `sender_pub.pem`
-- Người nhận: `rcpt_priv.pem`, `rcpt_pub.pem`
+- 2 file: `<file_name>_priv.pem`, `<file_name>_pub.pem`
+Người gửi cần tạo key cho cả mình và người nhận
+
 ### 3.2. Người gửi mã hóa e-mail
 Người gửi dùng khóa riêng của mình và khóa công khai của người nhận để mã hóa:
 ```bash
