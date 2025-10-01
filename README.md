@@ -24,8 +24,8 @@ Chạy lệnh sau để sinh khóa cho người gửi và người nhận:
 python gen_keys.py
 ```
 Kết quả tạo ra:
-  -Người gửi: sender_priv.pem, sender_pub.pem
-  -Người nhận: rcpt_priv.pem, rcpt_pub.pem
+- Người gửi: `sender_priv.pem`, `sender_pub.pem`
+- Người nhận: `rcpt_priv.pem`, `rcpt_pub.pem`
 ### 3.2. Người gửi mã hóa e-mail
 Người gửi dùng khóa riêng của mình và khóa công khai của người nhận để mã hóa:
 ```bash
@@ -47,5 +47,5 @@ python decrypt.py \
   --out-dir out_mail
 ```
 Kết quả:
-  -Thư mục out_mail/ chứa message.txt và các file đính kèm.
-  -Chữ ký số được kiểm tra tự động: nếu nội dung bị thay đổi, giải mã sẽ thất bại.
+- Thư mục `out_mail/` chứa message.txt và các file đính kèm.
+- Chữ ký số được kiểm tra tự động: nếu nội dung bị thay đổi, giải mã sẽ thất bại.
