@@ -30,23 +30,16 @@ Người gửi cần tạo key cho cả mình và người nhận
 ### 3.2. Người gửi mã hóa e-mail
 Người gửi dùng khóa riêng của mình và khóa công khai của người nhận để mã hóa:
 ```bash
-python encrypt.py \
-  --sender-priv sender_priv.pem \
-  --recipient-pub rcpt_pub.pem \
-  --subject "Demo Hybrid" \
-  --body "Xin chào, đây là nội dung test hybrid." \
-  --attach "file1.pdf" "file2.png" \
-  --out envelope.json
+python encrypt.py 
 ```
-Kết quả: file envelope.json chứa dữ liệu đã mã hóa, có thể gửi qua e-mail.
+Nhập thông tin theo yêu cầu 
+Kết quả: file envelope chứa dữ liệu đã mã hóa, có thể gửi qua e-mail.
 ### 3.. Người nhận giải mã e-mail
 Người nhận dùng khóa riêng của mình để giải mã:
 ```bash
-python decrypt.py \
-  --recipient-priv rcpt_priv.pem \
-  --in envelope.json \
-  --out-dir out_mail
+python decrypt.py 
 ```
+Nhập thông tin theo yêu cầu
 Kết quả:
 - Thư mục `out_mail/` chứa message.txt và các file đính kèm.
 - Chữ ký số được kiểm tra tự động: nếu nội dung bị thay đổi, giải mã sẽ thất bại.
