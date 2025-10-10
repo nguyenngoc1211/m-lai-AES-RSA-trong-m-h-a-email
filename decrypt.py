@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
-import argparse, os, io, json, base64, zipfile, re
+import os, io, json, base64, zipfile, re
+from getpass import getpass
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 b64d = lambda s: base64.b64decode(s)
+
+def ask(prompt, default=None, is_password=False):
+    p = f"{prompt}" + (f" [{default}]" if default else "") + ": "
+    s = getpass(p) if is_password else input(p)
+    s = s.strip()
+    return (default if s == "" and default is not None else s)
 
 def load_private_key_pem(path, password:bytes|None):
     return serialization.load_pem_private_key(open(path,"rb").read(), password=password)
@@ -18,21 +25,22 @@ def unzip_payload(blob:bytes, outdir:str)->str:
     return msg
 
 def main():
-    ap = argparse.ArgumentParser(description="Hybrid mail decrypt")
-    ap.add_argument("--recipient-priv", required=True, help="PEM private key of recipient")
-    ap.add_argument("--recipient-pass", default=None, help="Password for recipient private key (optional)")
-    ap.add_argument("--in", dest="infile", required=True, help="envelope.json from sender")
-    ap.add_argument("--out-dir", default="decrypted")
-    args = ap.parse_args()
+    print("=== Hybrid mail decrypt ===")
+    recipient_priv = ask("Đường dẫn khóa riêng người nhận (PEM)")
+    recipient_pass_str = ask("Mật khẩu cho khóa riêng người nhận (bỏ trống nếu không có)", is_password=True)
+    recipient_pass = recipient_pass_str.encode() if recipient_pass_str else None
 
-    env = json.load(open(args.infile, "r", encoding="utf-8"))
+    infile = ask("Đường dẫn envelope.json", default="envelope.json")
+    out_dir = ask("Thư mục giải mã đầu ra", default="decrypted")
+
+    env = json.load(open(infile, "r", encoding="utf-8"))
     nonce      = b64d(env["nonce"])
     ciphertext = b64d(env["ciphertext"])
     wrapped    = b64d(env["wrapped_key"])
     signature  = b64d(env["signature"])
     sender_pub = serialization.load_pem_public_key(b64d(env["sender_pub"]))
 
-    recip_priv = load_private_key_pem(args.recipient_priv, args.recipient_pass.encode() if args.recipient_pass else None)
+    recip_priv = load_private_key_pem(recipient_priv, recipient_pass)
     aes_key = recip_priv.decrypt(
         wrapped,
         padding.OAEP(mgf=padding.MGF1(hashes.SHA256()),
@@ -47,10 +55,10 @@ def main():
     )
 
     payload = AESGCM(aes_key).decrypt(nonce, ciphertext, None)
-    msg = unzip_payload(payload, args.out_dir)
+    msg = unzip_payload(payload, out_dir)
 
     m = re.search(r"^Subject:\s*(.*)$", msg, re.MULTILINE)
-    print("OK. Output ->", args.out_dir)
+    print("Giải mã OK →", out_dir)
     if m: print("Subject:", m.group(1))
 
 if __name__ == "__main__":
