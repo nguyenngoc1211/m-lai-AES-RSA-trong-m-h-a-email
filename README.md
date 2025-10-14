@@ -8,9 +8,11 @@
   Khóa này dùng để **mã hóa toàn bộ nội dung thư và tệp đính kèm** vì có tốc độ nhanh, an toàn và cơ chế xác thực dữ liệu (GCM).  
   Tuy nhiên, khóa AES chỉ được sử dụng tạm thời và **không gửi trực tiếp qua mạng**.
 
-- **RSA-3072**: là khóa **bất đối xứng**, gồm hai phần: **khóa công khai** và **khóa riêng**.  
-  - Người gửi dùng **khóa công khai của người nhận** để **mã hóa (wrap)** khóa AES, đảm bảo chỉ người nhận (với khóa riêng) mới có thể giải mã và lấy lại khóa AES thật.  
-  - Đồng thời, người gửi cũng dùng **khóa riêng của mình** để **ký số (digital signature)**, giúp người nhận kiểm chứng rằng thư thực sự đến từ đúng người gửi và nội dung không bị thay đổi.
+- **RSA-3072 (RSA-OAEP + RSA-PSS)**: là khóa **bất đối xứng**, gồm hai phần: **khóa công khai** và **khóa riêng**.  
+  - Với **RSA-OAEP (SHA-256)**: người gửi dùng **khóa công khai của người nhận** để **mã hóa (wrap)** khóa AES.  
+    → Chỉ người nhận (với khóa riêng) mới có thể giải mã được khóa AES thật.  
+  - Với **RSA-PSS (SHA-256)**: người gửi dùng **khóa riêng của mình** để **ký số** lên dữ liệu đã mã hóa,  
+    giúp người nhận kiểm chứng **tính xác thực và toàn vẹn** của e-mail.  
 
 Mục tiêu: đảm bảo **bí mật**, **toàn vẹn**, **xác thực** và **chống chối bỏ** trong truyền e-mail.
 
