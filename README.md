@@ -1,12 +1,18 @@
 # Hybrid Mail Encryption (AES + RSA)
 
 ## 1. Giới thiệu
-Ứng dụng minh họa **mã hóa lai (hybrid encryption)** cho e-mail:
-- **AES-256-GCM**: mã hóa nội dung nhanh và an toàn.
-- **RSA-OAEP (SHA-256)**: mã hóa khóa AES để phân phối an toàn cho người nhận.
-- **RSA-PSS (SHA-256)**: chữ ký số xác thực người gửi, chống giả mạo.
 
-Mục tiêu: bảo vệ **bí mật, toàn vẹn, xác thực và chống chối bỏ** trong e-mail.
+Ứng dụng minh họa **mã hóa lai (Hybrid Encryption)** cho e-mail, kết hợp hai loại khóa:
+
+- **AES-256-GCM**: là khóa **đối xứng**, được sinh ngẫu nhiên cho mỗi lần gửi e-mail.  
+  Khóa này dùng để **mã hóa toàn bộ nội dung thư và tệp đính kèm** vì có tốc độ nhanh, an toàn và cơ chế xác thực dữ liệu (GCM).  
+  Tuy nhiên, khóa AES chỉ được sử dụng tạm thời và **không gửi trực tiếp qua mạng**.
+
+- **RSA-3072**: là khóa **bất đối xứng**, gồm hai phần: **khóa công khai** và **khóa riêng**.  
+  - Người gửi dùng **khóa công khai của người nhận** để **mã hóa (wrap)** khóa AES, đảm bảo chỉ người nhận (với khóa riêng) mới có thể giải mã và lấy lại khóa AES thật.  
+  - Đồng thời, người gửi cũng dùng **khóa riêng của mình** để **ký số (digital signature)**, giúp người nhận kiểm chứng rằng thư thực sự đến từ đúng người gửi và nội dung không bị thay đổi.
+
+Mục tiêu: đảm bảo **bí mật**, **toàn vẹn**, **xác thực** và **chống chối bỏ** trong truyền e-mail.
 
 ---
 ## 2. Yêu cầu hệ thống
