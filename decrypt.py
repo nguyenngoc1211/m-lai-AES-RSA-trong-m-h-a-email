@@ -1,35 +1,31 @@
 #!/usr/bin/env python3
 import os, io, json, base64, zipfile, re
-from getpass import getpass
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 b64d = lambda s: base64.b64decode(s)
 
-def ask(prompt, default=None, is_password=False):
+def ask(prompt, default=None):
     p = f"{prompt}" + (f" [{default}]" if default else "") + ": "
-    s = getpass(p) if is_password else input(p)
-    s = s.strip()
-    return (default if s == "" and default is not None else s)
+    s = input(p).strip()
+    return default if s == "" and default is not None else s
 
-def load_private_key_pem(path, password:bytes|None):
-    return serialization.load_pem_private_key(open(path,"rb").read(), password=password)
+def load_private_key_pem(path: str):
+    data = open(path, "rb").read()
+    return serialization.load_pem_private_key(data, password=None)
 
-def unzip_payload(blob:bytes, outdir:str)->str:
+def unzip_payload(blob: bytes, outdir: str) -> str:
     os.makedirs(outdir, exist_ok=True)
     with zipfile.ZipFile(io.BytesIO(blob), "r") as z:
         z.extractall(outdir)
         msg = z.read("message.txt").decode("utf-8")
-    open(os.path.join(outdir,"message.txt"),"w",encoding="utf-8").write(msg)
+    open(os.path.join(outdir, "message.txt"), "w", encoding="utf-8").write(msg)
     return msg
 
 def main():
     print("=== Hybrid mail decrypt ===")
     recipient_priv = ask("Đường dẫn khóa riêng người nhận (PEM)")
-    recipient_pass_str = ask("Mật khẩu cho khóa riêng người nhận (bỏ trống nếu không có)", is_password=True)
-    recipient_pass = recipient_pass_str.encode() if recipient_pass_str else None
-
     infile = ask("Đường dẫn envelope.json", default="envelope.json")
     out_dir = ask("Thư mục giải mã đầu ra", default="decrypted")
 
@@ -40,7 +36,7 @@ def main():
     signature  = b64d(env["signature"])
     sender_pub = serialization.load_pem_public_key(b64d(env["sender_pub"]))
 
-    recip_priv = load_private_key_pem(recipient_priv, recipient_pass)
+    recip_priv = load_private_key_pem(recipient_priv)
     aes_key = recip_priv.decrypt(
         wrapped,
         padding.OAEP(mgf=padding.MGF1(hashes.SHA256()),
@@ -59,7 +55,8 @@ def main():
 
     m = re.search(r"^Subject:\s*(.*)$", msg, re.MULTILINE)
     print("Giải mã OK →", out_dir)
-    if m: print("Subject:", m.group(1))
+    if m:
+        print("Subject:", m.group(1))
 
 if __name__ == "__main__":
     main()
